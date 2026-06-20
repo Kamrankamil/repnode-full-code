@@ -1,0 +1,18 @@
+{
+    "name": "saqib/extention_backend",
+    "autoload": {
+        "psr-4": {
+            "Saqib\\ExtentionBackend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kamrankamil",
+            "email": "kamrankamil202@gmail.com"
+        }
+    ],
+    "require": {
+        "twilio/sdk": "^8.10",
+        "phpmailer/phpmailer": "^7.0"
+    }
+}

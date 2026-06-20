@@ -1,0 +1,43 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependencies and generated output
+node_modules/
+**/node_modules/
+vendor/
+react-components/build/
+build/
+dist/
+**/.cache/
+
+# Local machine and database artifacts
+Microsoft/
+backend database/
+*.sql
+
+# Legacy/local maintenance scripts containing environment-specific credentials
+serverCOPY.php
+add_claim_columns.php
+add_dummy_kba.php
+add_otp_columns.php
+check_all_otps.php
+check_schema.php
+create_repnode_keys_table.php
+create_transactions_table.php
+insert_repnode_key.php
+populate_transactions.php
+seed_kba_for_wallet.php
+test_filtering.php
+test_otp_storage.php
+
+# Logs and OS/editor files
+*.log
+.DS_Store
+Thumbs.db
+**/.git.local-backup/
+
