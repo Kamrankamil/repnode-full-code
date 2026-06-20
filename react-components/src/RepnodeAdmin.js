@@ -8,6 +8,7 @@ export default function RepnodeAdmin({ walletAddress }) {
   const [keys, setKeys] = useState([]);
   const [nodeId, setNodeId] = useState('');
   const [privateKey, setPrivateKey] = useState('');
+  const [repnodeWalletAddress, setRepnodeWalletAddress] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const defaultApiBase = `${window.location.protocol}//${window.location.hostname}:8000/server.php`;
@@ -39,10 +40,11 @@ export default function RepnodeAdmin({ walletAddress }) {
     setMessage('');
     try {
       if (!isAdmin) throw new Error('Not authorized');
-      await axios.post(`${apiBase}?action=addRepNodeKey`, { node_id: nodeId, private_key: privateKey });
+      await axios.post(`${apiBase}?action=addRepNodeKey`, { node_id: nodeId, private_key: privateKey, wallet_address: repnodeWalletAddress });
       setMessage('Key added successfully');
       setNodeId('');
       setPrivateKey('');
+      setRepnodeWalletAddress('');
       fetchKeys();
     } catch (err) {
       setMessage('Failed to add key');
@@ -71,6 +73,10 @@ export default function RepnodeAdmin({ walletAddress }) {
           <label style={{ fontWeight: 600, color: '#333' }}>Private Key:</label>
           <input value={privateKey} onChange={e => setPrivateKey(e.target.value)} required style={{ marginLeft: 8, padding: 8, borderRadius: 6, border: '1px solid #bbb', width: '100%' }} />
         </div>
+        <div style={{ flex: 2, minWidth: 220 }}>
+          <label style={{ fontWeight: 600, color: '#333' }}>REP Node Wallet:</label>
+          <input value={repnodeWalletAddress} onChange={e => setRepnodeWalletAddress(e.target.value)} required placeholder="0x..." style={{ marginLeft: 8, padding: 8, borderRadius: 6, border: '1px solid #bbb', width: '100%' }} />
+        </div>
         <button type="submit" style={{ background: '#ff6b35', color: 'white', border: 'none', borderRadius: 8, padding: '10px 28px', fontWeight: 700, fontSize: 16, cursor: 'pointer', marginTop: 18 }}>Add Key</button>
       </form>
       {message && <div style={{ color: message.includes('success') ? 'green' : 'red', marginBottom: 18, fontWeight: 600 }}>{message}</div>}
@@ -80,6 +86,7 @@ export default function RepnodeAdmin({ walletAddress }) {
           <thead style={{ background: '#e0e7ff' }}>
             <tr>
               <th style={{ borderBottom: '2px solid #c7d2fe', padding: 10, color: '#1a3a52', fontWeight: 700 }}>Node ID</th>
+              <th style={{ borderBottom: '2px solid #c7d2fe', padding: 10, color: '#1a3a52', fontWeight: 700 }}>Wallet Address</th>
               <th style={{ borderBottom: '2px solid #c7d2fe', padding: 10, color: '#1a3a52', fontWeight: 700 }}>Encrypted Key</th>
             </tr>
           </thead>
@@ -87,6 +94,7 @@ export default function RepnodeAdmin({ walletAddress }) {
             {keys.map(k => (
               <tr key={k.node_id}>
                 <td style={{ padding: 10, fontWeight: 600 }}>{k.node_id}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: 12, padding: 10 }}>{k.wallet_address || 'Not assigned'}</td>
                 <td style={{ fontFamily: 'monospace', fontSize: 13, padding: 10 }}>{k.encrypted_private_key.slice(0, 32)}...</td>
               </tr>
             ))}

@@ -5,7 +5,7 @@ import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
 import Web3 from 'web3';
 import './index.css';
 import AdminDashboard from './admin/AdminDashboard';
-import RepnodeDashboard from './admin/RepnodeDashboard';
+import RepnodeAccessGate from './RepnodeAccessGate';
 import StakingPortal from './StakingPortal';
 import { apiUrl } from './apiBase';
 
@@ -1900,7 +1900,11 @@ function App() {
               <p style={{ color: '#444', fontSize: 18 }}>Connect with the admin wallet to access the Repnode Admin Dashboard.</p>
             </div>
           ) : currentPage === 'repnode' ? (
-            <RepnodeDashboard walletAddress={walletAddress} />
+            <RepnodeAccessGate
+              walletAddress={walletAddress}
+              walletConnected={walletConnected}
+              onConnectWallet={connectWallet}
+            />
           ) : currentPage === 'staking' ? (
             <StakingPortal
               walletAddress={walletAddress}

@@ -1,6 +1,7 @@
 
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 import dotenv from "dotenv";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +68,8 @@ const MIN_DEPOSIT_CONFIRMATIONS = Number(process.env.MIN_DEPOSIT_CONFIRMATIONS |
 // Set up Web3
 const web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
 console.log(`Using RPC URL: ${rpcUrl}`);
+const repnodeAccessChallenges = new Map();
+const REPNODE_CHALLENGE_TTL_MS = 5 * 60 * 1000;
 
 const rawPrivateKey = process.env.PRIVATE_KEY || "";
 const privateKey = rawPrivateKey.startsWith("0x") ? rawPrivateKey : `0x${rawPrivateKey}`;
@@ -1184,6 +1187,67 @@ app.get("/transactions", (req, res) => {
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "reward-transfer", port });
+});
+
+app.get('/repnode/access-challenge/:walletAddress', async (req, res) => {
+  const walletAddress = String(req.params.walletAddress || '').trim().toLowerCase();
+  if (!web3.utils.isAddress(walletAddress)) {
+    return res.status(400).json({ status: 'error', message: 'A valid wallet address is required.' });
+  }
+
+  const [registeredRows] = await db.query(
+    `SELECT node_id FROM repnode_keys WHERE LOWER(wallet_address) = ? LIMIT 1`,
+    [walletAddress]
+  );
+  if (registeredRows.length === 0) {
+    return res.status(403).json({ status: 'error', authorized: false, message: 'This wallet is not assigned to a REP node.' });
+  }
+
+  const expiresAt = Date.now() + REPNODE_CHALLENGE_TTL_MS;
+  const nonce = crypto.randomBytes(24).toString('hex');
+  const message = [
+    'IIC REP Node access',
+    `Wallet: ${walletAddress}`,
+    `Nonce: ${nonce}`,
+    `Expires: ${expiresAt}`,
+  ].join('\n');
+
+  repnodeAccessChallenges.set(walletAddress, { message, expiresAt });
+  res.json({ status: 'success', message, expiresAt });
+});
+
+app.post('/repnode/verify-access', async (req, res) => {
+  const walletAddress = String(req.body.wallet_address || '').trim().toLowerCase();
+  const signature = String(req.body.signature || '').trim();
+  const challenge = repnodeAccessChallenges.get(walletAddress);
+
+  if (!web3.utils.isAddress(walletAddress) || !signature || !challenge || challenge.expiresAt < Date.now()) {
+    repnodeAccessChallenges.delete(walletAddress);
+    return res.status(401).json({ status: 'error', authorized: false, message: 'Access challenge is missing or expired.' });
+  }
+
+  try {
+    const recoveredAddress = web3.eth.accounts.recover(challenge.message, signature).toLowerCase();
+    repnodeAccessChallenges.delete(walletAddress);
+
+    if (recoveredAddress !== walletAddress) {
+      return res.status(401).json({ status: 'error', authorized: false, message: 'Wallet signature does not match.' });
+    }
+
+    const [rows] = await db.query(
+      `SELECT node_id FROM repnode_keys WHERE LOWER(wallet_address) = ? LIMIT 1`,
+      [walletAddress]
+    );
+
+    if (rows.length === 0) {
+      return res.status(403).json({ status: 'error', authorized: false, message: 'This wallet is not assigned to a REP node.' });
+    }
+
+    return res.json({ status: 'success', authorized: true, nodeId: Number(rows[0].node_id) });
+  } catch (error) {
+    repnodeAccessChallenges.delete(walletAddress);
+    return res.status(401).json({ status: 'error', authorized: false, message: 'Unable to verify wallet signature.' });
+  }
 });
 
 // Run getRandomWallets every 60 seconds

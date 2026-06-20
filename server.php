@@ -81,6 +81,13 @@ if ($conn->connect_error) {
     die(json_encode(['success'=>false,'error'=>'DB Failed: '.$conn->connect_error]));
 }
 
+// REP-node access is tied to an explicit public wallet address. Private keys
+// remain encrypted and are never used as browser authentication credentials.
+$repnodeWalletColumn = $conn->query("SHOW COLUMNS FROM repnode_keys LIKE 'wallet_address'");
+if ($repnodeWalletColumn && $repnodeWalletColumn->num_rows === 0) {
+    $conn->query("ALTER TABLE repnode_keys ADD COLUMN wallet_address VARCHAR(42) NULL AFTER node_id, ADD UNIQUE KEY uniq_repnode_wallet_address (wallet_address)");
+}
+
 $ENCRYPTION_KEY = getenv('ENCRYPTION_KEY') ?: '';
 
 /* OTP STORAGE */
@@ -532,6 +539,27 @@ error_log("------------------------------------------------------");
 switch ($action) {
 
     // 0. ✅ REP NODE KEY MANAGEMENT
+    case 'check-repnode-access':
+        $address = normalizeWalletAddress($input['address'] ?? '');
+        if (!preg_match('/^0x[a-f0-9]{40}$/', $address)) {
+            echo json_encode(['success' => true, 'authorized' => false]);
+            exit;
+        }
+
+        $stmt = $conn->prepare("SELECT node_id FROM repnode_keys WHERE LOWER(wallet_address) = ? LIMIT 1");
+        $stmt->bind_param("s", $address);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $repnode = $result->fetch_assoc();
+        $stmt->close();
+
+        echo json_encode([
+            'success' => true,
+            'authorized' => (bool)$repnode,
+            'nodeId' => $repnode ? (int)$repnode['node_id'] : null
+        ]);
+        exit;
+
     case 'addRepNodeKey':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
@@ -541,16 +569,17 @@ switch ($action) {
 
         $node_id = $input['node_id'] ?? null;
         $private_key = $input['private_key'] ?? null;
+        $wallet_address = normalizeWalletAddress($input['wallet_address'] ?? '');
 
-        if (!$node_id || !$private_key) {
+        if (!$node_id || !$private_key || !preg_match('/^0x[a-f0-9]{40}$/', $wallet_address)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'node_id and private_key required']);
+            echo json_encode(['success' => false, 'error' => 'node_id, private_key, and a valid wallet_address are required']);
             exit;
         }
 
         $encrypted = encryptKey($private_key, $ENCRYPTION_KEY);
-        $stmt = $conn->prepare("INSERT INTO repnode_keys (node_id, encrypted_private_key) VALUES (?, ?) ON DUPLICATE KEY UPDATE encrypted_private_key = VALUES(encrypted_private_key)");
-        $stmt->bind_param("is", $node_id, $encrypted);
+        $stmt = $conn->prepare("INSERT INTO repnode_keys (node_id, wallet_address, encrypted_private_key) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE wallet_address = VALUES(wallet_address), encrypted_private_key = VALUES(encrypted_private_key)");
+        $stmt->bind_param("iss", $node_id, $wallet_address, $encrypted);
 
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'node_id' => $node_id]);
@@ -569,7 +598,7 @@ switch ($action) {
             exit;
         }
 
-        $result = $conn->query("SELECT node_id, encrypted_private_key FROM repnode_keys ORDER BY node_id ASC");
+        $result = $conn->query("SELECT node_id, wallet_address, encrypted_private_key FROM repnode_keys ORDER BY node_id ASC");
         $keys = [];
 
         if ($result) {

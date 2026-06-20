@@ -5,6 +5,7 @@ export default function RepnodeKeys({ allowAddKey = true }) {
   const [keys, setKeys] = useState([]);
   const [nodeId, setNodeId] = useState('');
   const [privateKey, setPrivateKey] = useState('');
+  const [walletAddress, setWalletAddress] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const defaultApiBase = `${window.location.protocol}//${window.location.hostname}:8000/server.php`;
@@ -27,10 +28,11 @@ export default function RepnodeKeys({ allowAddKey = true }) {
     e.preventDefault();
     setMessage('');
     try {
-      await axios.post(`${apiBase}?action=addRepNodeKey`, { node_id: nodeId, private_key: privateKey });
+      await axios.post(`${apiBase}?action=addRepNodeKey`, { node_id: nodeId, private_key: privateKey, wallet_address: walletAddress });
       setMessage('Key added successfully');
       setNodeId('');
       setPrivateKey('');
+      setWalletAddress('');
       fetchKeys();
     } catch (err) {
       setMessage('Failed to add key');
@@ -50,6 +52,10 @@ export default function RepnodeKeys({ allowAddKey = true }) {
             <label className="admin-label">Private Key:</label>
             <input value={privateKey} onChange={e => setPrivateKey(e.target.value)} required className="admin-input" />
           </div>
+          <div style={{ flex: 2, minWidth: 220 }}>
+            <label className="admin-label">REP Node Wallet Address:</label>
+            <input value={walletAddress} onChange={e => setWalletAddress(e.target.value)} required className="admin-input" placeholder="0x..." />
+          </div>
           <button type="submit" className="admin-btn">Add Key</button>
         </form>
       )}
@@ -60,6 +66,7 @@ export default function RepnodeKeys({ allowAddKey = true }) {
           <thead>
             <tr>
               <th>Node ID</th>
+              <th>Wallet Address</th>
               <th>Encrypted Key</th>
             </tr>
           </thead>
@@ -67,6 +74,7 @@ export default function RepnodeKeys({ allowAddKey = true }) {
             {keys.map(k => (
               <tr key={k.node_id}>
                 <td style={{ fontWeight: 600 }}>{k.node_id}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{k.wallet_address || 'Not assigned'}</td>
                 <td style={{ fontFamily: 'monospace', fontSize: 13 }}>{k.encrypted_private_key.slice(0, 32)}...</td>
               </tr>
             ))}
