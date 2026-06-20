@@ -61,6 +61,16 @@ date_default_timezone_set('UTC');
 session_start();
 
 /* DATABASE CONFIG */
+$localEnvPath = __DIR__ . '/.env';
+if (is_file($localEnvPath)) {
+    $localEnv = parse_ini_file($localEnvPath, false, INI_SCANNER_RAW) ?: [];
+    foreach ($localEnv as $envName => $envValue) {
+        if (getenv($envName) === false) {
+            putenv($envName . '=' . $envValue);
+        }
+    }
+}
+
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'root';
 $pass = getenv('DB_PASSWORD') ?: '';
