@@ -14,7 +14,7 @@
 }
 
 .staking-hero-card,
-.staking-diagram-card,
+.staking-guide-card,
 .staking-panel,
 .summary-card {
   background: rgba(255, 255, 255, 0.92);
@@ -99,159 +99,145 @@
   font-size: 12px;
 }
 
-.staking-diagram-card {
+.staking-guide-card {
   border-radius: 28px;
-  padding: 26px 28px 32px;
+  padding: 30px;
 }
 
-.diagram-header {
-  text-align: center;
-  font-size: 18px;
-  color: #1a202c;
-  padding: 18px;
-  border: 1px solid rgba(26, 58, 82, 0.2);
-  border-radius: 18px;
-  margin-bottom: 20px;
+.staking-guide-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 26px;
 }
 
-.diagram-grid {
+.staking-guide-head h2 {
+  margin: 10px 0 0;
+  color: #172737;
+  font-size: clamp(26px, 3vw, 38px);
+}
+
+.staking-guide-head p {
+  max-width: 520px;
+  margin: 0;
+  color: #607080;
+  line-height: 1.6;
+}
+
+.staking-guide-steps {
   display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  gap: 24px;
-  align-items: center;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
-.diagram-lane {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-}
-
-.diagram-box {
-  min-width: 92px;
-  padding: 16px 18px;
-  border: 1px solid rgba(26, 58, 82, 0.5);
-  background: #ffffff;
-  text-transform: lowercase;
-  font-size: 18px;
-  text-align: center;
-}
-
-.diagram-arrow {
-  width: 10px;
-  height: 60px;
-  background: #f4de17;
+.staking-guide-steps li {
   position: relative;
-  border: 1px solid #5fa0db;
+  min-height: 220px;
+  padding: 22px 18px 20px;
+  border: 1px solid #dbe4ec;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #ffffff 0%, #f4f7fa 100%);
 }
 
-.diagram-arrow.down::after,
-.diagram-arrow.up::after {
-  content: '';
+.staking-guide-steps li:not(:last-child)::after {
+  content: '→';
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-}
-
-.diagram-arrow.down::after {
-  bottom: -14px;
-  border-top: 16px solid #f4de17;
-}
-
-.diagram-arrow.up::after {
-  top: -14px;
-  border-bottom: 16px solid #f4de17;
-}
-
-.diagram-wallet {
-  min-width: 138px;
-  padding: 12px 16px;
-  text-align: center;
-  color: #ffffff;
-  font-size: 18px;
-  box-shadow: inset -12px -10px 0 rgba(0, 0, 0, 0.12);
-  clip-path: polygon(0 0, 92% 0, 100% 22%, 100% 100%, 0 100%);
-}
-
-.diagram-wallet.dinnar {
-  background: #b88a00;
-}
-
-.diagram-wallet.saya {
-  background: #5c97ce;
-}
-
-.diagram-service {
+  z-index: 2;
+  top: 50%;
+  right: -22px;
+  width: 28px;
+  height: 28px;
   display: grid;
-  justify-items: center;
-  gap: 18px;
-}
-
-.diagram-service-copy {
-  text-align: center;
-  color: #333;
-  font-size: 18px;
-  line-height: 1.35;
-}
-
-.diagram-cylinder {
-  width: min(100%, 420px);
-  min-height: 240px;
-  border: 2px solid rgba(26, 58, 82, 0.38);
-  border-radius: 50% / 16%;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  text-align: center;
-  padding: 26px;
-  position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,247,250,0.96) 100%);
-}
-
-.diagram-cylinder::before,
-.diagram-cylinder::after {
-  content: '';
-  position: absolute;
-  left: -2px;
-  right: -2px;
-  height: 46px;
-  border: 2px solid rgba(26, 58, 82, 0.38);
+  place-items: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.diagram-cylinder::before {
-  top: -24px;
-}
-
-.diagram-cylinder::after {
-  bottom: -24px;
-}
-
-.diagram-cylinder span,
-.diagram-cylinder strong {
-  position: relative;
-  z-index: 1;
-}
-
-.diagram-cylinder span {
-  font-size: 18px;
-  color: #1a202c;
-}
-
-.diagram-cylinder strong {
-  font-size: 24px;
-  color: #101820;
-}
-
-.diagram-service-base {
-  background: #5c97ce;
   color: #ffffff;
-  padding: 12px 22px;
+  background: #d39b5f;
+  box-shadow: 0 5px 14px rgba(211, 155, 95, 0.28);
+}
+
+.guide-step-number {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #183d56;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.guide-step-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
   border-radius: 18px;
-  box-shadow: inset -12px -10px 0 rgba(0, 0, 0, 0.14);
+  background: #f3e8da;
+  color: #183d56;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.staking-guide-steps h3 {
+  margin: 18px 0 8px;
+  color: #172737;
+  font-size: 18px;
+}
+
+.staking-guide-steps p {
+  margin: 0;
+  color: #667584;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.staking-guide-flow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 18px 22px;
+  border-radius: 20px;
+  background: #183d56;
+  color: #ffffff;
+}
+
+.staking-guide-flow div {
+  display: grid;
+  gap: 5px;
+  text-align: center;
+}
+
+.staking-guide-flow span:not(.guide-flow-arrow) {
+  color: #c9d7e1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.staking-guide-flow strong {
+  font-size: 16px;
+}
+
+.guide-vault-state {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.guide-flow-arrow {
+  color: #e0ad74;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .staking-feedback {
@@ -629,7 +615,6 @@
 }
 
 @media (max-width: 1100px) {
-  .diagram-grid,
   .staking-summary-grid,
   .staking-workspace-grid,
   .staking-lower-grid,
@@ -647,6 +632,19 @@
     min-width: 0;
     width: 100%;
   }
+
+  .staking-guide-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .staking-guide-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .staking-guide-steps li:not(:last-child)::after {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -655,7 +653,7 @@
   }
 
   .staking-hero-card,
-  .staking-diagram-card,
+  .staking-guide-card,
   .staking-panel,
   .summary-card {
     border-radius: 22px;
@@ -675,13 +673,20 @@
     align-items: flex-start;
   }
 
-  .diagram-service-copy {
-    font-size: 16px;
+  .staking-guide-steps {
+    grid-template-columns: 1fr;
   }
 
-  .diagram-wallet,
-  .diagram-service-base {
-    width: 100%;
+  .staking-guide-steps li {
+    min-height: 0;
+  }
+
+  .staking-guide-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-flow-arrow {
+    text-align: center;
   }
 
   .activity-amount {

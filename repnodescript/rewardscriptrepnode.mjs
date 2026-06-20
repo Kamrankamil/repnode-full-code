@@ -567,7 +567,9 @@ const settleMaturedStake = async (position) => {
       throw new Error(`Stake position ${position.id} was not claimable during settlement.`);
     }
 
-    const newSayaBalance = Number(position.saya_balance || 0) + totalAmount;
+    // The payout leaves the vault for the user's on-chain wallet. Keep the
+    // remaining liquid custody balance unchanged instead of re-crediting it.
+    const newSayaBalance = Number(position.saya_balance || 0);
     const newStakedBalance = Math.max(0, Number(position.staked_balance || 0) - principalAmount);
     const newTotalRewardsClaimed = Number(position.total_rewards_claimed || 0) + rewardAmount;
 

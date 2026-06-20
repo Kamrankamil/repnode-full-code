@@ -916,7 +916,9 @@ switch ($action) {
             }
             $claimStmt->close();
 
-            $newSayaBalance = (float)$wallet['saya_balance'] + $totalReturn;
+            // The principal and reward were transferred out of custody to the
+            // user's on-chain wallet, so they must not become lockable again.
+            $newSayaBalance = (float)$wallet['saya_balance'];
             $newStakedBalance = max(0, (float)$wallet['staked_balance'] - $principal);
             $newTotalRewardsClaimed = (float)$wallet['total_rewards_claimed'] + $reward;
 

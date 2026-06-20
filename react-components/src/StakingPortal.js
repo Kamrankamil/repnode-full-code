@@ -589,7 +589,9 @@ function StakingPortal({ walletAddress, walletConnected, onConnectWallet }) {
   const repnodeReady = Boolean(custody?.vaultAddress);
   const confirmedSayaBalance = toNumber(wallet?.sayaBalance);
   const lockedSayaBalance = toNumber(wallet?.stakedBalance, toNumber(summary?.totalActiveStaked));
-  const unstakedCustodyBalance = Math.max(0, confirmedSayaBalance - lockedSayaBalance);
+  // sayaBalance already represents liquid custody; stake creation subtracts
+  // locked principal from it, so stakedBalance must not be subtracted twice.
+  const unstakedCustodyBalance = Math.max(0, confirmedSayaBalance);
   const walletDepositGap = Math.max(0, toNumber(walletChainBalance) - confirmedSayaBalance);
 
   return (
@@ -610,34 +612,62 @@ function StakingPortal({ walletAddress, walletConnected, onConnectWallet }) {
           </div>
         </div>
 
-        <div className="staking-diagram-card">
-          <div className="diagram-header">User Interface (Staking Portal Page)</div>
-          <div className="diagram-grid">
-            <div className="diagram-lane">
-              <div className="diagram-box">In</div>
-              <div className="diagram-arrow down"></div>
-              <div className="diagram-wallet dinnar">DINNAR wallet</div>
-              <div className="diagram-arrow down"></div>
-              <div className="diagram-wallet saya">SAYA wallet</div>
+        <div className="staking-guide-card">
+          <div className="staking-guide-head">
+            <div>
+              <span className="staking-eyebrow">How it works</span>
+              <h2>Stake SAYA in five simple steps</h2>
             </div>
-            <div className="diagram-service">
-              <div className="diagram-service-copy">
-                <div>Staking amount</div>
-                <div>Duration time</div>
-                <div>Reward status display</div>
-              </div>
-              <div className="diagram-cylinder">
-                <span>SAYA coin</span>
-                <strong>Staking service</strong>
-              </div>
-              <div className="diagram-service-base">Common wallet linkage and staking ledger</div>
+            <p>Your wallet stays yours. Only deposited SAYA can be locked, and claimed SAYA returns to your wallet.</p>
+          </div>
+
+          <ol className="staking-guide-steps">
+            <li>
+              <span className="guide-step-number">1</span>
+              <span className="guide-step-icon" aria-hidden="true">👛</span>
+              <h3>Connect wallet</h3>
+              <p>Connect the wallet address that owns your SAYA.</p>
+            </li>
+            <li>
+              <span className="guide-step-number">2</span>
+              <span className="guide-step-icon" aria-hidden="true">↗</span>
+              <h3>Deposit SAYA</h3>
+              <p>Send the amount you want to stake into the vault.</p>
+            </li>
+            <li>
+              <span className="guide-step-number">3</span>
+              <span className="guide-step-icon" aria-hidden="true">✓</span>
+              <h3>Wait for confirmation</h3>
+              <p>After 3 confirmations, it appears as available to lock.</p>
+            </li>
+            <li>
+              <span className="guide-step-number">4</span>
+              <span className="guide-step-icon" aria-hidden="true">🔒</span>
+              <h3>Choose and stake</h3>
+              <p>Enter an amount, choose a duration, and start staking.</p>
+            </li>
+            <li>
+              <span className="guide-step-number">5</span>
+              <span className="guide-step-icon" aria-hidden="true">💰</span>
+              <h3>Claim to wallet</h3>
+              <p>At maturity, claim principal and reward back on-chain.</p>
+            </li>
+          </ol>
+
+          <div className="staking-guide-flow">
+            <div>
+              <span>IN YOUR WALLET</span>
+              <strong>Spendable SAYA</strong>
             </div>
-            <div className="diagram-lane">
-              <div className="diagram-box">Out</div>
-              <div className="diagram-arrow up"></div>
-              <div className="diagram-wallet dinnar">DINNAR wallet</div>
-              <div className="diagram-arrow up"></div>
-              <div className="diagram-wallet saya">SAYA wallet</div>
+            <span className="guide-flow-arrow">Deposit →</span>
+            <div className="guide-vault-state">
+              <span>IN THE VAULT</span>
+              <strong>Available → Locked</strong>
+            </div>
+            <span className="guide-flow-arrow">← Claim</span>
+            <div>
+              <span>BACK IN WALLET</span>
+              <strong>Principal + reward</strong>
             </div>
           </div>
         </div>
